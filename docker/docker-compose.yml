@@ -1,0 +1,51 @@
+version: '3.8'
+
+# ============================================================
+#  docker-compose for local and CI test execution
+#
+#  Usage:
+#    Run full suite:         docker-compose run --rm playwright
+#    Run smoke only:         docker-compose run --rm playwright npx playwright test --grep @smoke
+#    Run API tests only:     docker-compose run --rm playwright npx playwright test tests/api
+#    Run specific browser:   docker-compose run --rm playwright npx playwright test --project=firefox
+# ============================================================
+
+services:
+  playwright:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: playwright-ts-framework:local
+
+    # Mount source for live editing (remove for pure isolation)
+    volumes:
+      - ../tests:/app/tests:ro
+      - ../src:/app/src:ro
+      # Write artefacts back to the host so they survive container removal
+      - ../playwright-report:/app/playwright-report
+      - ../test-results:/app/test-results
+      - ../allure-results:/app/allure-results
+
+    # Load credentials from the host .env file
+    env_file:
+      - ../.env
+
+    environment:
+      CI: "true"
+      BASE_URL: ${BASE_URL:-https://practicetestautomation.com}
+      TODO_BASE_URL: ${TODO_BASE_URL:-https://demo.playwright.dev/todomvc}
+      API_BASE_URL: ${API_BASE_URL:-https://reqres.in}
+      TEST_USERNAME: ${TEST_USERNAME:-student}
+      TEST_PASSWORD: ${TEST_PASSWORD:-Password123}
+      HEADLESS: "true"
+
+    # Playwright requires a writable /tmp for browser processes
+    tmpfs:
+      - /tmp
+
+    # Resource constraints — tune for your CI runner
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G

@@ -1,0 +1,166 @@
+name: Playwright Test Suite
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  # Allow manual runs with a specific tag filter
+  workflow_dispatch:
+    inputs:
+      grep:
+        description: 'Test tag filter (e.g. @smoke, @regression)'
+        required: false
+        default: ''
+      project:
+        description: 'Playwright project to run (e.g. chromium, api)'
+        required: false
+        default: ''
+
+# Cancel in-progress runs on the same branch to save CI minutes
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Allows dotenv to load .env; we use GitHub secrets instead in CI
+  CI: true
+  BASE_URL: https://practicetestautomation.com
+  TODO_BASE_URL: https://demo.playwright.dev/todomvc
+  API_BASE_URL: https://reqres.in
+  TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
+  TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+  # Pin Node via .nvmrc or explicitly here
+  NODE_VERSION: '20'
+
+jobs:
+  # ------------------------------------------------------------------ #
+  #  Static analysis — fast gate, runs before expensive browser tests   #
+  # ------------------------------------------------------------------ #
+  lint-and-typecheck:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run TypeScript type-check
+        run: npm run type-check
+
+  # ------------------------------------------------------------------ #
+  #  API tests — no browser, fast feedback on contract changes          #
+  # ------------------------------------------------------------------ #
+  api-tests:
+    name: API Tests
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run API tests
+        run: npx playwright test tests/api --project=api
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-results
+          path: |
+            playwright-report/
+            test-results/
+            allure-results/
+          retention-days: 14
+
+  # ------------------------------------------------------------------ #
+  #  E2E tests — matrix across browsers                                 #
+  # ------------------------------------------------------------------ #
+  e2e-tests:
+    name: E2E Tests (${{ matrix.project }})
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    strategy:
+      fail-fast: false          # run all browsers even if one fails
+      matrix:
+        project: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps ${{ matrix.project }}
+
+      - name: Run E2E tests (${{ matrix.project }})
+        run: |
+          GREP="${{ github.event.inputs.grep }}"
+          if [ -n "$GREP" ]; then
+            npx playwright test tests/e2e tests/ui --project=${{ matrix.project }} --grep "$GREP"
+          else
+            npx playwright test tests/e2e tests/ui --project=${{ matrix.project }}
+          fi
+
+      - name: Upload test artefacts (${{ matrix.project }})
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results-${{ matrix.project }}
+          path: |
+            playwright-report/
+            test-results/
+            allure-results/
+          retention-days: 14
+
+  # ------------------------------------------------------------------ #
+  #  Publish consolidated HTML report (runs after all test jobs)        #
+  # ------------------------------------------------------------------ #
+  publish-report:
+    name: Publish HTML Report
+    runs-on: ubuntu-latest
+    needs: [api-tests, e2e-tests]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artefacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-results
+
+      - name: Merge Allure results
+        run: |
+          mkdir -p merged-allure-results
+          find all-results -name '*.json' -path '*/allure-results/*' -exec cp {} merged-allure-results/ \;
+
+      - name: Upload merged results
+        uses: actions/upload-artifact@v4
+        with:
+          name: merged-test-results
+          path: merged-allure-results/
+          retention-days: 30

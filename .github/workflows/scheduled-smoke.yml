@@ -1,0 +1,64 @@
+name: Scheduled Smoke Tests
+
+# Run smoke tests every day at 06:00 UTC to detect environment drift
+# (sites going down, API contract changes, etc.) before the team starts work.
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+env:
+  CI: true
+  BASE_URL: https://practicetestautomation.com
+  TODO_BASE_URL: https://demo.playwright.dev/todomvc
+  API_BASE_URL: https://reqres.in
+  TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
+  TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+  NODE_VERSION: '20'
+
+jobs:
+  smoke:
+    name: Daily Smoke — ${{ matrix.project }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium, api]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        if: matrix.project != 'api'
+        run: npx playwright install --with-deps ${{ matrix.project }}
+
+      - name: Run @smoke tests (${{ matrix.project }})
+        run: npx playwright test --project=${{ matrix.project }} --grep @smoke
+
+      - name: Upload smoke results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-results-${{ matrix.project }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+      # Optional: notify Slack on failure
+      # - name: Notify Slack on failure
+      #   if: failure()
+      #   uses: slackapi/slack-github-action@v1
+      #   with:
+      #     payload: '{"text":"Smoke tests failed on ${{ matrix.project }}! <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"}'
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

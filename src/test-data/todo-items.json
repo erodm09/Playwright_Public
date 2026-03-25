@@ -1,0 +1,21 @@
+{
+  "singleItems": [
+    "Buy groceries",
+    "Walk the dog",
+    "Write unit tests"
+  ],
+  "multipleItems": [
+    "Plan sprint",
+    "Review pull requests",
+    "Update documentation",
+    "Fix failing pipeline",
+    "Demo to stakeholders"
+  ],
+  "editScenarios": [
+    {
+      "original": "Old task title",
+      "updated": "Revised task title",
+      "description": "Basic edit workflow"
+    }
+  ]
+}

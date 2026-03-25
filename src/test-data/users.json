@@ -1,0 +1,30 @@
+{
+  "validCredentials": {
+    "username": "student",
+    "password": "Password123",
+    "description": "Valid login for practicetestautomation.com"
+  },
+  "invalidCredentials": [
+    {
+      "id": "wrong_username",
+      "username": "incorrectUser",
+      "password": "Password123",
+      "expectedError": "Your username is invalid!",
+      "description": "Existing password with non-existent username"
+    },
+    {
+      "id": "wrong_password",
+      "username": "student",
+      "password": "wrongPassword",
+      "expectedError": "Your password is invalid!",
+      "description": "Valid username with incorrect password"
+    },
+    {
+      "id": "empty_credentials",
+      "username": "",
+      "password": "",
+      "expectedError": "Your username is invalid!",
+      "description": "Both fields left blank"
+    }
+  ]
+}

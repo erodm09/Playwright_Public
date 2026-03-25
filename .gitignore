@@ -1,0 +1,49 @@
+# ===========================
+#  Node
+# ===========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===========================
+#  TypeScript build output
+# ===========================
+dist/
+
+# ===========================
+#  Environment / secrets
+# ===========================
+.env
+.env.local
+.env.*.local
+
+# ===========================
+#  Playwright artefacts
+# ===========================
+playwright-report/
+test-results/
+allure-results/
+allure-report/
+
+# Playwright browser cache (use `npx playwright install` to regenerate)
+.playwright/
+
+# ===========================
+#  OS / editor
+# ===========================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ===========================
+#  Misc
+# ===========================
+*.log
+coverage/
