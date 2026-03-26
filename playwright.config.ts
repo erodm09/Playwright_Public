@@ -20,7 +20,8 @@ export default defineConfig({
 
   // Parallelise at the worker level for speed; respect CI resource limits
   fullyParallel: true,
-  workers: process.env.CI ? 4 : undefined,
+  // Omit `workers` locally so Playwright picks a default (exactOptionalPropertyTypes disallows `undefined`)
+  ...(process.env.CI ? { workers: 4 } : {}),
 
   // Fail fast in CI if a test is accidentally left with `.only`
   forbidOnly: !!process.env.CI,

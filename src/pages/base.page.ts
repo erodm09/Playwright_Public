@@ -44,7 +44,8 @@ export abstract class BasePage {
     return this.page.title();
   }
 
-  async getCurrentUrl(): Promise<string> {
+  /** Current URL (`page.url()` is synchronous in Playwright). */
+  getCurrentUrl(): string {
     return this.page.url();
   }
 

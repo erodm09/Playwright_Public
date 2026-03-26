@@ -9,7 +9,7 @@
  *  @data-driven — parameterised over a set of todo items
  */
 
-import { test, expect } from '../../../src/fixtures';
+import { test } from '../../../src/fixtures';
 import todoData from '../../../src/test-data/todo-items.json';
 
 test.describe('Todo Management', () => {
