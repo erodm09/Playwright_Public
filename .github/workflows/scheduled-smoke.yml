@@ -11,10 +11,11 @@ env:
   CI: true
   BASE_URL: https://practicetestautomation.com
   TODO_BASE_URL: https://demo.playwright.dev/todomvc
-  API_BASE_URL: https://reqres.in
+  API_BASE_URL: https://jsonplaceholder.typicode.com
   TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
   TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
   NODE_VERSION: '20'
+  NODE_OPTIONS: '--no-warnings'
 
 jobs:
   smoke:

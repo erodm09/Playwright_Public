@@ -24,6 +24,7 @@ export const UserFactory = {
     return {
       name: faker.person.fullName(),
       job: faker.person.jobTitle(),
+      email: faker.internet.email(),
       ...overrides,
     };
   },
@@ -38,6 +39,6 @@ export const UserFactory = {
 
   /** Build a user with an intentionally invalid payload (empty strings). */
   buildInvalid(): Partial<CreateUserRequest> {
-    return { name: '', job: '' };
+    return { name: '', job: '', email: '' };
   },
 };

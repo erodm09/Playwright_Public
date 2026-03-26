@@ -34,7 +34,7 @@ COPY . .
 ENV CI=true \
     BASE_URL=https://practicetestautomation.com \
     TODO_BASE_URL=https://demo.playwright.dev/todomvc \
-    API_BASE_URL=https://reqres.in \
+    API_BASE_URL=https://jsonplaceholder.typicode.com \
     HEADLESS=true
 
 # Artefact directories must exist before Playwright tries to write to them

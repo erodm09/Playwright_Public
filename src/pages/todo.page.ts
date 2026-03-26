@@ -1,6 +1,7 @@
 import type { Locator } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { BasePage } from './base.page';
+import { env } from '../utils/env.config';
 
 /** Available filter tabs in the TodoMVC footer. */
 export type TodoFilter = 'All' | 'Active' | 'Completed';
@@ -19,14 +20,13 @@ export class TodoPage extends BasePage {
   private readonly clearCompleted = this.page.locator('.clear-completed');
   private readonly todoCount = this.page.locator('.todo-count');
 
-  static readonly PATH = '/todomvc';
-
   // ------------------------------------------------------------------ //
   //  Navigation                                                          //
   // ------------------------------------------------------------------ //
 
+  /** Always use the TodoMVC demo origin — E2E projects default baseURL to the login site. */
   async navigate(): Promise<void> {
-    await this.goto(TodoPage.PATH);
+    await this.goto(env.todoBaseUrl);
     // Wait for the input to be ready before the test starts interacting
     await expect(this.newTodoInput).toBeVisible();
   }

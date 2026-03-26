@@ -1,7 +1,7 @@
 import { test as base } from '@playwright/test';
 import { LoginPage } from '../pages/login.page';
 import { TodoPage } from '../pages/todo.page';
-import { ReqresClient } from '../api/reqres.client';
+import { JsonPlaceholderUsersClient } from '../api/jsonplaceholder-users.client';
 
 /**
  * Custom fixture types — extend this interface to add new fixtures.
@@ -18,7 +18,7 @@ type PageFixtures = {
 };
 
 type ApiFixtures = {
-  reqresClient: ReqresClient;
+  usersApiClient: JsonPlaceholderUsersClient;
 };
 
 type AllFixtures = PageFixtures & ApiFixtures;
@@ -47,8 +47,8 @@ export const test = base.extend<AllFixtures>({
   //  API fixtures                                                        //
   // ------------------------------------------------------------------ //
 
-  reqresClient: async ({ request }, use) => {
-    await use(new ReqresClient(request));
+  usersApiClient: async ({ request }, use) => {
+    await use(new JsonPlaceholderUsersClient(request));
   },
 });
 

@@ -7,7 +7,7 @@
  *
  * This suite intentionally uses the Playwright APIRequestContext *directly*
  * (without a typed client wrapper) to demonstrate both patterns side-by-side.
- * The reqres users.spec.ts shows the wrapper pattern; this spec shows the
+ * The users.spec.ts shows the wrapper pattern; this spec shows the
  * lower-level approach useful for quick exploratory tests.
  */
 

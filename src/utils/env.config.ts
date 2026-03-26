@@ -28,7 +28,7 @@ function optionalEnv(key: string, defaultValue: string): string {
 export const env = {
   baseUrl: optionalEnv('BASE_URL', 'https://practicetestautomation.com'),
   todoBaseUrl: optionalEnv('TODO_BASE_URL', 'https://demo.playwright.dev/todomvc'),
-  apiBaseUrl: optionalEnv('API_BASE_URL', 'https://reqres.in'),
+  apiBaseUrl: optionalEnv('API_BASE_URL', 'https://jsonplaceholder.typicode.com'),
 
   // Credentials — only validated when a test actually needs them
   get testUsername(): string { return requireEnv('TEST_USERNAME'); },

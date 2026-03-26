@@ -107,7 +107,7 @@ export default defineConfig({
     {
       name: 'api',
       use: {
-        baseURL: process.env.API_BASE_URL ?? 'https://reqres.in',
+        baseURL: process.env.API_BASE_URL ?? 'https://jsonplaceholder.typicode.com',
         // No browser needed; the request context is created inside fixtures
         extraHTTPHeaders: {
           Accept: 'application/json',
